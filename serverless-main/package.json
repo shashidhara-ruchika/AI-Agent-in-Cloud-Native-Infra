@@ -1,0 +1,21 @@
+{
+  "name": "aws-lambda-serverless-notifier",
+  "version": "2.0.0",
+  "description": "AWS Lambda function triggered by AWS SNS/SQS for user email verification and AI Agent notifications backed by AWS RDS PostgreSQL",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "package": "zip -r serverless.zip index.js package.json node_modules",
+    "test": "node --check index.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.700.0",
+    "dotenv": "^16.4.5",
+    "mailgun-js": "^0.22.0",
+    "pg": "^8.11.3",
+    "sequelize": "^6.37.1",
+    "uuid": "^9.0.1"
+  },
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,34 @@
+{
+  "name": "cloud-native-ai-agent",
+  "version": "2.0.0",
+  "description": "TypeScript & Python FastAPI AI Agent utilizing OpenAI GPT-4o mini via GitHub Models with automated switchable generic tool-calling loop and windowed DocumentDB conversation history",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "npx tsx index.ts",
+    "agent:hybrid": "npx tsx index.ts --mode=hybrid",
+    "agent:ts": "npx tsx index.ts --mode=typescript",
+    "agent:python": "npx tsx index.ts --mode=python-fastapi",
+    "backend:dev": "uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^20.11.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "got": "^14.4.4",
+    "lowdb": "^7.0.1",
+    "mongodb": "^6.10.0",
+    "openai": "^4.70.3",
+    "ora": "^8.1.1",
+    "pg": "^8.13.1",
+    "terminal-image": "^3.0.0",
+    "tsx": "^4.19.2",
+    "uuid": "^11.0.2",
+    "zod": "^3.23.8"
+  }
+}

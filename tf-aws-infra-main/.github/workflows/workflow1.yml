@@ -1,0 +1,38 @@
+name: AWS Terraform & Packer Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate_aws_infra:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@main
+
+      - name: Validate Packer AWS AMI Template
+        working-directory: ./packer
+        run: |
+          packer init aws-ai-agent.pkr.hcl
+          packer fmt -check aws-ai-agent.pkr.hcl
+          packer validate -syntax-only aws-ai-agent.pkr.hcl
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+
+      - name: Terraform Initialize (AWS Provider)
+        run: terraform init -backend=false
+
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      - name: Terraform Validate
+        run: terraform validate

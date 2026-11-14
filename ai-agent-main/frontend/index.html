@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cloud-Native Agentic AI Tool</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --panel: #131b2e;
+      --border: #23304d;
+      --accent: #38bdf8;
+      --accent-green: #34d399;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand h1 { font-size: 1.15rem; font-weight: 700; color: #fff; }
+    .brand p { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: var(--accent);
+    }
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 16px;
+      padding: 16px 24px;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 420px;
+      max-height: 62vh;
+    }
+    .msg {
+      padding: 10px 14px;
+      border-radius: 10px;
+      max-width: 85%;
+      line-height: 1.45;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+    }
+    .msg.user {
+      align-self: flex-end;
+      background: #1d4ed8;
+      color: #fff;
+    }
+    .msg.assistant {
+      align-self: flex-start;
+      background: #1e293b;
+      border: 1px solid var(--border);
+    }
+    .msg.tool {
+      align-self: flex-start;
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      color: var(--accent-green);
+      font-family: monospace;
+      font-size: 0.78rem;
+    }
+    .chat-input-bar {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+    }
+    input, select, textarea {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      width: 100%;
+    }
+    button {
+      background: var(--accent);
+      color: #0f172a;
+      font-weight: 600;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+    button:hover { opacity: 0.9; }
+    .sidebar { display: flex; flex-direction: column; gap: 16px; }
+    .section-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; font-size: 0.82rem; }
+    .field-label { color: var(--muted); font-size: 0.75rem; margin-bottom: 2px; }
+    .tool-list { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; }
+    .tool-pill {
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tool-pill span { font-family: monospace; color: var(--accent-green); font-size: 0.78rem; }
+    .tool-pill small { color: var(--muted); font-size: 0.7rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>Cloud-Native Agentic AI Tool</h1>
+      <p>OpenAI GPT-4o mini via GitHub Models • Automated Switchable Generic Tool-Calling Loop • AWS DocumentDB & RDS PostgreSQL</p>
+    </div>
+    <div class="badges">
+      <span class="badge">Model: openai/gpt-4o-mini</span>
+      <span class="badge" id="windowBadge">DocumentDB Window: 10 msgs</span>
+      <span class="badge" id="modeBadge">Loop: python-fastapi</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="card-header">
+        <span>Agent Conversation (Windowed DocumentDB Context)</span>
+        <button onclick="clearHistory()" style="background:#334155;color:#e2e8f0;padding:4px 10px;font-size:0.75rem;">Clear Session</button>
+      </div>
+      <div class="chat-messages" id="chatContainer">
+        <div class="msg assistant">Hello! I am your Cloud-Native AI Agent powered by OpenAI GPT-4o mini via GitHub Models. Ask me to check weather, inspect AWS RDS PostgreSQL status, publish an AWS SNS/SQS notification to Lambda, or invoke any custom REST API you register!</div>
+      </div>
+      <div class="chat-input-bar">
+        <input id="userInput" type="text" placeholder="Ask the agent (e.g., 'Check RDS PostgreSQL status and weather in Seattle')..." onkeydown="if(event.key==='Enter') sendChat()" />
+        <button onclick="sendChat()">Send</button>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="card">
+        <div class="card-header">Switchable Loop & DocumentDB Window</div>
+        <div class="section-body">
+          <div>
+            <div class="field-label">Tool-Calling Loop Execution Mode</div>
+            <select id="executionMode" onchange="updateModeBadge()">
+              <option value="python-fastapi">Python FastAPI Agent Loop (/api/v1/agent/chat)</option>
+              <option value="hybrid">Hybrid (TS Agent Loop + Auto-Synced FastAPI Tools)</option>
+              <option value="typescript">TypeScript Agent Loop (Local + TS REST APIs)</option>
+            </select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div>
+              <div class="field-label">DocumentDB Session ID</div>
+              <input id="sessionId" value="default-session" />
+            </div>
+            <div>
+              <div class="field-label">Sliding Window Size</div>
+              <input id="windowSize" type="number" value="10" min="2" max="100" onchange="updateWindowBadge()" />
+            </div>
+          </div>
+          <div id="memoryStats" style="color:var(--muted);font-size:0.76rem;">
+            Windowed Context: 0 msgs | Total Persisted in DocumentDB: 0 msgs
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span>Registered Generic Tools</span>
+          <button onclick="loadTools()" style="background:#334155;color:#e2e8f0;padding:3px 8px;font-size:0.72rem;">Refresh</button>
+        </div>
+        <div class="section-body">
+          <div class="tool-list" id="toolList"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Add Custom REST API to Tool Loop</div>
+        <div class="section-body">
+          <div>
+            <div class="field-label">Tool Function Name</div>
+            <input id="toolName" placeholder="e.g. fetch_order_status" />
+          </div>
+          <div>
+            <div class="field-label">Description (for GPT-4o mini)</div>
+            <input id="toolDesc" placeholder="Fetches order details from custom microservice" />
+          </div>
+          <div style="display:grid;grid-template-columns:90px 1fr;gap:6px;">
+            <select id="toolMethod">
+              <option value="POST">POST</option>
+              <option value="GET">GET</option>
+            </select>
+            <input id="toolUrl" placeholder="https://api.example.com/orders" />
+          </div>
+          <button onclick="registerCustomApiTool()">+ Register Custom API Tool</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function updateModeBadge() {
+      const mode = document.getElementById('executionMode').value;
+      document.getElementById('modeBadge').textContent = 'Loop: ' + mode;
+    }
+    function updateWindowBadge() {
+      const w = document.getElementById('windowSize').value;
+      document.getElementById('windowBadge').textContent = 'DocumentDB Window: ' + w + ' msgs';
+    }
+    async function loadTools() {
+      try {
+        const res = await fetch('/api/v1/tools');
+        const data = await res.json();
+        const container = document.getElementById('toolList');
+        container.innerHTML = '';
+        (data.tools || []).forEach(t => {
+          const div = document.createElement('div');
+          div.className = 'tool-pill';
+          div.innerHTML = `<span>${t.name}</span><small>${t.method || 'POST'} ${t.source}</small>`;
+          container.appendChild(div);
+        });
+      } catch (e) {}
+    }
+    async function registerCustomApiTool() {
+      const name = document.getElementById('toolName').value.trim();
+      const description = document.getElementById('toolDesc').value.trim();
+      const endpoint_url = document.getElementById('toolUrl').value.trim();
+      const http_method = document.getElementById('toolMethod').value;
+      if (!name || !description || !endpoint_url) return alert('Fill in tool name, description, and URL');
+      await fetch('/api/v1/tools/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          description,
+          endpoint_url,
+          http_method,
+          parameters_schema: {
+            type: 'object',
+            properties: { query: { type: 'string', description: 'Request query or identifier' } }
+          }
+        })
+      });
+      document.getElementById('toolName').value = '';
+      document.getElementById('toolDesc').value = '';
+      document.getElementById('toolUrl').value = '';
+      await loadTools();
+    }
+    async function sendChat() {
+      const input = document.getElementById('userInput');
+      const message = input.value.trim();
+      if (!message) return;
+      input.value = '';
+      const chat = document.getElementById('chatContainer');
+      const userDiv = document.createElement('div');
+      userDiv.className = 'msg user';
+      userDiv.textContent = message;
+      chat.appendChild(userDiv);
+      chat.scrollTop = chat.scrollHeight;
+
+      const session_id = document.getElementById('sessionId').value || 'default-session';
+      const window_size = parseInt(document.getElementById('windowSize').value || '10', 10);
+      const execution_mode = document.getElementById('executionMode').value;
+
+      try {
+        const res = await fetch('/api/v1/agent/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, session_id, window_size, execution_mode })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Request failed');
+
+        (data.toolCallsExecuted || []).forEach(tc => {
+          const toolDiv = document.createElement('div');
+          toolDiv.className = 'msg tool';
+          toolDiv.textContent = `🔧 Tool Executed: ${tc.name}(${JSON.stringify(tc.args)}) -> ${tc.result}`;
+          chat.appendChild(toolDiv);
+        });
+
+        const botDiv = document.createElement('div');
+        botDiv.className = 'msg assistant';
+        botDiv.textContent = data.reply || '(No content)';
+        chat.appendChild(botDiv);
+        document.getElementById('memoryStats').textContent =
+          `Windowed Context: ${data.windowedCount} msgs | Total Persisted in DocumentDB: ${data.totalStoredCount} msgs`;
+      } catch (err) {
+        const errDiv = document.createElement('div');
+        errDiv.className = 'msg tool';
+        errDiv.textContent = '⚠️ ' + err.message;
+        chat.appendChild(errDiv);
+      }
+      chat.scrollTop = chat.scrollHeight;
+    }
+    async function clearHistory() {
+      const session_id = document.getElementById('sessionId').value || 'default-session';
+      await fetch(`/api/v1/conversations/${encodeURIComponent(session_id)}`, { method: 'DELETE' });
+      document.getElementById('chatContainer').innerHTML = '';
+      document.getElementById('memoryStats').textContent =
+        'Windowed Context: 0 msgs | Total Persisted in DocumentDB: 0 msgs';
+    }
+    loadTools();
+  </script>
+</body>
+</html>
